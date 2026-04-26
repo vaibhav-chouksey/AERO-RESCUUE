@@ -65,35 +65,34 @@ Aero Rescue is an **Android-native disaster management application** purpose-bui
 
 **Built for:** Government disaster management departments, NDRF teams, municipal emergency response units
 
----
-
 ## 📱 App Screenshots
 
-<table>
+<table style="width:100%">
   <tr>
-    <td align="center">
+    <td align="center" width="50%">
       <strong>🏠 Home Dashboard</strong><br/>
-      Personalized control panel with drone status and disaster report access
+      <img src="Screenshots/home.png" width="300pt"/><br/>
+      <i>Personalized control panel</i>
     </td>
-    <td align="center">
+    <td align="center" width="50%">
       <strong>📋 Report Details</strong><br/>
-      Full situational report with GPS coordinates, people count, and supply needs
+      <img src="Screenshots/report.png" width="300pt"/><br/>
+      <i>Full situational report</i>
     </td>
   </tr>
   <tr>
-    <td align="center">
+    <td align="center" width="50%">
       <strong>🗺️ Live Mission Map</strong><br/>
-      Real-time Mapbox map showing drone location and Help Center pin
+      <img src="Screenshots/map.png" width="300pt"/><br/>
+      <i>Real-time Mapbox overlays</i>
     </td>
-    <td align="center">
+    <td align="center" width="50%">
       <strong>👤 User Profile</strong><br/>
-      Rescue personnel profile with live location and personal details
+      <img src="Screenshots/profile.png" width="300pt"/><br/>
+      <i>Personnel management</i>
     </td>
   </tr>
 </table>
-
----
-
 ## ✨ Core Features
 
 ### 🚨 Disaster Report Management
