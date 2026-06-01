@@ -61,15 +61,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.disastermanager.R
 import com.example.disastermanager.model.UserModel
-import com.example.disastermanager.ui.theme.GlobalNavigation
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 
 @Composable
-fun ProfilePage(modifier: Modifier = Modifier) {
+fun ProfilePage(modifier: Modifier = Modifier, navController: NavController) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
@@ -270,9 +270,10 @@ fun ProfilePage(modifier: Modifier = Modifier) {
                 Button(
                     onClick = {
                         FirebaseAuth.getInstance().signOut()
-                        val navController = GlobalNavigation.navController
-                        navController.popBackStack()
-                        navController.navigate(route = "auth")
+                        navController.navigate(route = "auth") {
+                            popUpTo("homescreen") { inclusive = true }
+                            launchSingleTop = true
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),

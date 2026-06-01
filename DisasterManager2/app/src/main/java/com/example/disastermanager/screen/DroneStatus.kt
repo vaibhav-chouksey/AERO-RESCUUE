@@ -28,19 +28,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-
-// Data Model for a Drone
-data class Drone(
-    val id: String,
-    val name: String,
-    val status: String // "Assigned" or "Unassigned"
-)
+import com.example.disastermanager.ViewModel.DroneViewModel
+import com.example.disastermanager.model.Drone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,12 +46,14 @@ fun DroneStatusScreen(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
-    // Single Drone Data (Matching your Firebase ID "drone_1")
-    val droneList = listOf(
-        Drone("drone_1", "Drone 01 - Alpha", "Assigned")
-    )
+    val droneViewModel: DroneViewModel = viewModel()
+    val droneList by droneViewModel.drones
 
-    val activeCount = droneList.count { it.status == "Assigned" }
+    LaunchedEffect(Unit) {
+        droneViewModel.startFleetUpdates()
+    }
+
+    val activeCount = droneList.count { it.status != "Available" && it.status != "Offline" }
 
     Scaffold(
         topBar = {
@@ -99,7 +99,7 @@ fun DroneStatusScreen(
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )
                         Text(
-                            text = "${droneList.size} Total Drone", // Updated text for singular
+                            text = "${droneList.size} Total Drone${if (droneList.size == 1) "" else "s"}",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -122,7 +122,6 @@ fun DroneStatusScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            // --- List of Drones (Contains only 1 now) ---
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -130,8 +129,7 @@ fun DroneStatusScreen(
                     DroneCard(
                         drone = drone,
                         onClick = {
-                            // Navigate to detail page passing the specific ID
-                            navController.navigate("drone_detail/${drone.id}")
+                            navController.navigate("drone_detail/${drone.droneId}")
                         }
                     )
                 }
@@ -145,7 +143,7 @@ fun DroneCard(
     drone: Drone,
     onClick: () -> Unit // Accepted click action
 ) {
-    val isAssigned = drone.status == "Assigned"
+    val isAssigned = drone.status != "Available" && drone.status != "Offline"
     val statusColor = if (isAssigned) Color(0xFF4CAF50) else Color.Gray
     val containerColor = if (isAssigned)
         MaterialTheme.colorScheme.surfaceVariant
@@ -177,7 +175,7 @@ fun DroneCard(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = drone.name,
+                    text = drone.droneId.ifBlank { "Drone" },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )

@@ -56,7 +56,7 @@ fun WeatherPage(modifier: Modifier = Modifier) {
             // REMOVED: The top Spacer was deleted because .padding(vertical = 16.dp) handles it now.
 
             // 1. Location Section
-//            MyApp(locationViewModel, weatherViewModel)
+            MyApp(locationViewModel, weatherViewModel)
 
             // 2. Weather Details Section
             weatherPage(weatherViewModel)

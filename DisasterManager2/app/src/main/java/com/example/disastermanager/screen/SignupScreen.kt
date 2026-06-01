@@ -54,7 +54,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.disastermanager.ViewModel.Apputil
 import com.example.disastermanager.ViewModel.AuthViewModel
-import com.example.disastermanager.ui.theme.GlobalNavigation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,9 +85,7 @@ fun SignupScreen(
             isLoading = false
             if (success) {
                 val userId = result!!
-                // Using the specific navigation logic you provided
-                GlobalNavigation.navController.navigate("profile_setup/$userId") {
-                    // Optional: clear backstack so they can't go back to signup
+                navController.navigate("profile_setup/$userId") {
                     popUpTo("auth") { inclusive = true }
                 }
             } else {

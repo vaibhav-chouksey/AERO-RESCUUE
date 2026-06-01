@@ -19,29 +19,26 @@ class weatherViewModel : ViewModel() {
     private var lastFetchedCity: String? = null
 
     fun getData(city: String) {
-        // 1. LOGIC CHECK: If the city is the same as the last one we fetched, STOP here.
-        // We ignore case (e.g., "London" == "london") and trim spaces.
-        if (lastFetchedCity != null && lastFetchedCity.equals(city.trim(), ignoreCase = true)) {
-            return
-        }
-
         viewModelScope.launch {
             _weatherResult.value = NetworkResponse.Loading
             try {
-                val response = WeatherApi.getWeather(Constant.ApiKey, city)
+                val response = WeatherApi.getWeather(Constant.ApiKey, city.trim())
                 if (response.isSuccessful) {
                     response.body()?.let {
                         _weatherResult.value = NetworkResponse.Success(it)
-                        // 2. UPDATE: Only update this AFTER a successful fetch
                         lastFetchedCity = city.trim()
                     }
                 } else {
-                    _weatherResult.value = NetworkResponse.Error("Failed to Load Data")
-                    // Optional: If it failed, reset lastFetchedCity so the user can try again immediately
+                    val errorMsg = if (response.code() == 400) {
+                        "Location not found. Please verify spelling."
+                    } else {
+                        "Failed to load weather data (Code: ${response.code()})"
+                    }
+                    _weatherResult.value = NetworkResponse.Error(errorMsg)
                     lastFetchedCity = null
                 }
             } catch (e: Exception) {
-                _weatherResult.value = NetworkResponse.Error("Failed to Load Data")
+                _weatherResult.value = NetworkResponse.Error("Network error. Please check internet connection.")
                 lastFetchedCity = null
             }
         }

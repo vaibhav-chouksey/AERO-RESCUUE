@@ -35,3 +35,61 @@ class Solution {
         solve(ls);
     }
 }
+
+class Solution {
+    public int[] constructTransformedArray(int[] nums) {
+        int n = nums.length;
+        int[] result = new int[];
+        // List<Integer> result = new ArrayList();
+        for(int i=0;i<n;i++){
+            int no = nums[i];
+            if(no>0){
+                no=i+no%n;
+            }else{
+                no=i+n-abs(no%n);
+            }
+           result[i] = nums[no];
+
+        }
+        return result;
+    }
+}
+
+class Solution {
+    int min = Integer.MAX_VALUE;
+    public int minRemoval(int[] nums, int k) {
+        Arrays.sort(nums);
+        int i=0;
+        int j=1;
+
+        while(j<nums.length){
+            max = arr[j];
+            min = arr[i];
+            if(max<=min*k){
+                
+            }else{
+
+            }
+        }
+
+        return min;
+    }
+
+    public int solve(int i,int j,int[] arr,int k){
+        max = arr[j];
+        min = arr[i];
+
+        if(max>(k*min)){
+            return n;
+        }else{
+           return  
+        }
+    }
+
+}
+class Solution {
+    public int longestValidParentheses(String s) {
+        if
+    }
+}
+

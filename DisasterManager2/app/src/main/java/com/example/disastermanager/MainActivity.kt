@@ -14,11 +14,18 @@ import com.example.disastermanager.ui.theme.DisasterManagerTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
+import com.mapbox.common.MapboxOptions
+//import com.mapbox.maps.MapboxOptions
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val token = BuildConfig.MAPBOX_ACCESS_TOKEN
+        Log.e("MAPBOX", "Setting access token to: '$token'")
+        com.mapbox.common.MapboxOptions.accessToken = token
+
         setContent {
             DisasterManagerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

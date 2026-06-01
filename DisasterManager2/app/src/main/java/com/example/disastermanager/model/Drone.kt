@@ -12,10 +12,12 @@ data class Drone(
     var payload: String = "",          // e.g. "0 People Detected"
     var peopleCount: Int = 0,
     var droneId: String = "",
-    var status: String = "idle",
+    var status: String = "Available",
     var timestamp: Timestamp? = null,
     var imageUrl: String = "",
     var altitude: Double = 0.0,
+    var speed: Double = 0.0,
+    var assignedIncidentId: String? = null,
 
     // ---------------- NEW FIELDS YOU ASKED TO ADD ----------------
     var filename: String = "",

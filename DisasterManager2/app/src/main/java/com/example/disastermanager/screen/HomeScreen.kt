@@ -54,17 +54,17 @@ fun homeScreen(modifier: Modifier = Modifier, navController: NavController) {
             }
         }
     ){
-        ContentScreen(modifier = modifier.padding(it),selectedIndex)
+        ContentScreen(modifier = modifier.padding(it), selectedIndex, navController)
 
     }
 }
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int) {
+fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, navController: NavController) {
     when (selectedIndex) {
-        0 -> HomePage(modifier)
+        0 -> HomePage(navController, modifier)
         1 -> WeatherPage(modifier)
         2 -> MapPage(modifier)
-        3 -> ProfilePage(modifier)
+        3 -> ProfilePage(modifier, navController)
     }
 }
 

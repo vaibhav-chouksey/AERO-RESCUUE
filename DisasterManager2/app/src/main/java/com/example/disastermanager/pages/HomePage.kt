@@ -22,7 +22,7 @@ import com.example.disastermanager.components.QuickActionsGrid
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomePage(modifier: Modifier = Modifier) {
+fun HomePage(navController: androidx.navigation.NavController, modifier: Modifier = Modifier) {
     val scrollState = rememberScrollState()
 
     Scaffold(
@@ -53,10 +53,12 @@ fun HomePage(modifier: Modifier = Modifier) {
             )
 
             DroneStatusQuickCard(
+                navController = navController,
                 modifier = Modifier.fillMaxWidth()
             )
 
             QuickActionsGrid(
+                navController = navController,
                 modifier = Modifier.fillMaxWidth()
             )
 

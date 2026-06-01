@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.disastermanager.pages.DroneStatusScreen
+import com.example.disastermanager.screen.AssignDroneScreen
 import com.example.disastermanager.screen.AuthScreen
 import com.example.disastermanager.screen.DisasterReportsPage
 import com.example.disastermanager.screen.DroneDetailScreen
@@ -29,7 +31,6 @@ fun AppNavigation(modifier: Modifier) {
     val navController = rememberNavController()
     val modifier = Modifier.padding(top = 0.dp)
 
-    GlobalNavigation.navController = navController
     val isLoggedIn = Firebase.auth.currentUser != null
     val firstpage = if (isLoggedIn) "homescreen" else "auth"
     NavHost(navController = navController, startDestination = firstpage, modifier = modifier) {
@@ -62,14 +63,14 @@ fun AppNavigation(modifier: Modifier) {
         }
         composable("report_disaster"){
 
-//            ReportDisaster(modifier,navController)
-            DisasterReportsPage()
+            DisasterReportsPage(modifier, navController)
         }
 
         composable("emerg_sos"){
 
             EmergencySOSPage(
-                modifier
+                modifier,
+                navController
             )
         }
 
@@ -85,17 +86,29 @@ fun AppNavigation(modifier: Modifier) {
 
             DroneStatusScreen(modifier,navController)
         }
-        composable("report_detail"){
+
+        composable("assign_drone") {
+            AssignDroneScreen(modifier, navController)
+        }
+
+        composable(
+            route = "report_detail/{reportId}",
+            arguments = listOf(navArgument("reportId") { type = NavType.StringType })
+        ){
             ReportDetailScreen(
-                reportId = 123.toString(),
+                reportId = it.arguments?.getString("reportId").orEmpty(),
                 onBackClick = {navController.popBackStack()}
 
             )
         }
-        composable("drone_detail/{droneId}"){
-            var droneId = "drone_1"
+        composable(
+            route = "drone_detail/{droneId}",
+            arguments = listOf(navArgument("droneId") { type = NavType.StringType })
+        ){
+            val droneId = it.arguments?.getString("droneId").orEmpty()
             DroneDetailScreen(
-                droneId = droneId
+                droneId = droneId,
+                navController = navController
             )
 
         }
@@ -104,7 +117,4 @@ fun AppNavigation(modifier: Modifier) {
 
 
     }
-}
-object GlobalNavigation{
-    lateinit var navController: NavHostController
 }

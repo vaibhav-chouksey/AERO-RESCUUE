@@ -45,16 +45,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.disastermanager.ViewModel.DroneViewModel
 import com.example.disastermanager.ViewModel.ImageViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DroneDetailScreen(droneId: String) {
+fun DroneDetailScreen(droneId: String, navController: NavController) {
 
     val droneViewModel: DroneViewModel = viewModel()
-    val imageViewModel: ImageViewModel = viewModel() // 1. Initialize ImageViewModel
+    val imageViewModel: ImageViewModel = viewModel()
 
     val drone = droneViewModel.selectedDrone.value
     val isLoading = droneViewModel.isLoading.value
@@ -65,7 +66,6 @@ fun DroneDetailScreen(droneId: String) {
 
     LaunchedEffect(droneId) {
         droneViewModel.startRealtimeUpdates(droneId)
-        // ImageViewModel starts its updates in its init block
     }
 
     Scaffold(
@@ -73,7 +73,7 @@ fun DroneDetailScreen(droneId: String) {
             TopAppBar(
                 title = { Text("Drone Details: $droneId") },
                 navigationIcon = {
-                    IconButton(onClick = { /* Assuming a method to navigate back */ }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -121,8 +121,7 @@ fun DroneDetailScreen(droneId: String) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text("Status", style = MaterialTheme.typography.titleMedium)
                                 Text(
-//                                    text = drone.status.replaceFirstChar { it.uppercase() },
-                                    text = "Assigned",
+                                    text = drone.status.replaceFirstChar { it.uppercase() },
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -130,9 +129,8 @@ fun DroneDetailScreen(droneId: String) {
                             }
                         }
 
-                        // 🖼 LIVE DISASTER IMAGE (NEW SECTION)
+                        // 🖼 LIVE DISASTER IMAGE
                         if (imageViewModel.isLoading.value) {
-                            // Display a placeholder while loading the image URL
                             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         } else if (disasterImage?.url != null && disasterImage.url.isNotEmpty()) {
                             Card(
@@ -147,12 +145,12 @@ fun DroneDetailScreen(droneId: String) {
                                         modifier = Modifier.padding(bottom = 8.dp)
                                     )
                                     AsyncImage(
-                                        model = disasterImage.url, // URL from Firebase
+                                        model = disasterImage.url,
                                         contentDescription = "Live Aerial View from Drone",
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(200.dp) // Fixed height for image display
+                                            .height(200.dp)
                                             .clip(RoundedCornerShape(8.dp))
                                     )
                                     Text(
@@ -164,17 +162,14 @@ fun DroneDetailScreen(droneId: String) {
                                 }
                             }
                         } else {
-                            // Optional: Show message if no image URL is found
                             Text("No live image available.", color = Color.Gray)
                         }
-
 
                         // 🔋 BATTERY
                         DetailCard(
                             icon = Icons.Default.BatteryFull,
                             title = "Battery",
                             value = "${drone.voltage}V",
-//                            color = if (drone.voltage > 20) Color(0xFF4CAF50) else Color(0xFFFF5722)
                         )
 
                         // 📍 LOCATION
@@ -184,23 +179,21 @@ fun DroneDetailScreen(droneId: String) {
                             value = drone.getLocationString()
                         )
 
-                        // 👥 PEOPLE DETECTED (STRING)
+                        // 👥 PEOPLE DETECTED
                         DetailCard(
                             icon = Icons.Default.PersonSearch,
                             title = "Detection",
                             value = drone.payload
                         )
 
-                        // 🔢 PEOPLE COUNT (Assuming `peopleCount` exists in your Drone data model)
-                        // If it doesn't exist, you'll need to define it or fetch it.
+                        // 🔢 PEOPLE COUNT
                         DetailCard(
                             icon = Icons.Default.Tag,
                             title = "People Count",
                             value = drone.peopleCount.toString()
                         )
 
-                        // ⏱ LAST UPDATE
-                        // 🟢 LAST ACTIVE (Realtime)
+                        // 🟢 LAST ACTIVE
                         DetailCard(
                             icon = Icons.Default.AccessTime,
                             title = "Last Active",
@@ -218,8 +211,6 @@ fun DroneDetailScreen(droneId: String) {
                             title = "Altitude",
                             value = "${drone.altitude} m"
                         )
-
-
                     }
                 }
             }

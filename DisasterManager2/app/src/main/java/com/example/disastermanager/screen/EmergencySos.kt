@@ -18,19 +18,27 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,41 +51,92 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.disastermanager.ViewModel.EmergencyViewModel
 import com.example.disastermanager.pages.WeatherPage.LocationAccess.LocationUtils
 import com.example.disastermanager.pages.WeatherPage.LocationAccess.locationViewmodel
+import kotlinx.coroutines.delay
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmergencySOSPage(
     modifier: Modifier = Modifier,
-//    navController: NavHostController
+    navController: NavController
 ) {
-
-    var context = LocalContext.current
+    val context = LocalContext.current
     val locationViewModel: locationViewmodel = viewModel()
-
     val emergencyViewModel: EmergencyViewModel = viewModel()
     val locationUtils = remember { LocationUtils(context) }
-    val location = locationViewModel.location.value
 
-    LaunchedEffect(true) {
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var isCountingDown by remember { mutableStateOf(false) }
+    var countdown by remember { mutableIntStateOf(5) }
+    var isSending by remember { mutableStateOf(false) }
+    var resultMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
         if (locationUtils.hasLocationPermission(context)) {
             locationUtils.requestLocationUpdates(locationViewModel)
         }
     }
 
+    LaunchedEffect(isCountingDown) {
+        if (!isCountingDown) return@LaunchedEffect
 
-//    val location = locationViewModel.location.value
-//    var latitude = location?.latitude
-//    var longitude = location?.longitude
+        countdown = 5
+        while (countdown > 0 && isCountingDown) {
+            delay(1000)
+            countdown -= 1
+        }
 
+        if (isCountingDown && countdown == 0) {
+            val location = locationViewModel.location.value
+            if (location == null) {
+                isCountingDown = false
+                Toast.makeText(context, "GPS location unavailable. Please try again.", Toast.LENGTH_SHORT).show()
+                return@LaunchedEffect
+            }
 
-    // We use a Scaffold to ensure proper layout handling
+            isCountingDown = false
+            isSending = true
+            emergencyViewModel.sendEmergencyAlert(
+                context = context,
+                latitude = location.latitude,
+                longitude = location.longitude,
+                emergencyType = "SOS"
+            ) { success ->
+                isSending = false
+                resultMessage = if (success) "SOS registered and dispatch started" else "SOS failed. Please try again"
+            }
+        }
+    }
+
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            title = { Text("Send emergency SOS?") },
+            text = { Text("Your live GPS location will be sent to the emergency response team.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showConfirmDialog = false
+                        resultMessage = null
+                        isCountingDown = true
+                    }
+                ) {
+                    Text("Start Countdown")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        // Use a slightly red-tinted dark background for urgency, or standard surface
         containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         Column(
@@ -86,10 +145,8 @@ fun EmergencySOSPage(
                 .padding(innerPadding)
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween // Push content apart
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-
-            // --- Header ---
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     imageVector = Icons.Filled.Warning,
@@ -113,19 +170,16 @@ fun EmergencySOSPage(
                 )
             }
 
-            // --- The SOS Button (Centerpiece) ---
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(300.dp)
             ) {
-                // Outer Ring (Visual Pulse Effect)
                 Box(
                     modifier = Modifier
                         .size(280.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
                 )
-                // Middle Ring
                 Box(
                     modifier = Modifier
                         .size(230.dp)
@@ -133,30 +187,20 @@ fun EmergencySOSPage(
                         .background(MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
                 )
 
-                // The Actual Button
                 Surface(
                     modifier = Modifier
                         .size(180.dp)
                         .shadow(elevation = 10.dp, shape = CircleShape)
                         .clip(CircleShape)
-                        .clickable {
-                            val loc = locationViewModel.location.value
-
-                            if (loc == null) {
-                                Toast.makeText(context, "Getting location… Please wait", Toast.LENGTH_SHORT).show()
+                        .clickable(enabled = !isCountingDown && !isSending) {
+                            val location = locationViewModel.location.value
+                            if (location == null) {
+                                Toast.makeText(context, "Getting location. Please wait", Toast.LENGTH_SHORT).show()
                                 return@clickable
                             }
-
-                            emergencyViewModel.sendEmergencyAlert(
-                                context,
-                                loc.latitude,
-                                loc.longitude
-                            )
-//                            GlobalNavigation.navController.navigate("report_disaster")
-
-                        }
-                    ,
-                    color = MaterialTheme.colorScheme.error,
+                            showConfirmDialog = true
+                        },
+                    color = if (isCountingDown) Color(0xFFFF9800) else MaterialTheme.colorScheme.error,
                     contentColor = Color.White
                 ) {
                     Column(
@@ -164,17 +208,21 @@ fun EmergencySOSPage(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Call,
+                            imageVector = if (isCountingDown) Icons.Default.Close else Icons.Default.Call,
                             contentDescription = null,
                             modifier = Modifier.size(40.dp)
                         )
                         Text(
-                            text = "SOS",
+                            text = if (isCountingDown) countdown.toString() else "SOS",
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "TAP TO CALL",
+                            text = when {
+                                isSending -> "SENDING"
+                                isCountingDown -> "COUNTDOWN"
+                                else -> "TAP TO CALL"
+                            },
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(top = 4.dp)
@@ -183,7 +231,31 @@ fun EmergencySOSPage(
                 }
             }
 
-            // --- Info Card ---
+            if (isCountingDown) {
+                OutlinedButton(
+                    onClick = {
+                        isCountingDown = false
+                        resultMessage = "SOS cancelled"
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Cancel SOS")
+                }
+            }
+
+            resultMessage?.let {
+                Text(
+                    text = it,
+                    color = if (it.contains("failed", ignoreCase = true)) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
+
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
@@ -201,20 +273,11 @@ fun EmergencySOSPage(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
-
-                    // Feature List
-                    EmergencyFeatureRow(
-                        icon = Icons.Default.Call,
-                        text = "Calls Emergency Services automatically"
-                    )
-                    EmergencyFeatureRow(
-                        icon = Icons.Default.MyLocation, // Fixed icon import
-                        text = "Sends your live location to trusted contacts"
-                    )
+                    EmergencyFeatureRow(Icons.Default.Call, "Registers an SOS in Firestore")
+                    EmergencyFeatureRow(Icons.Default.MyLocation, "Sends your live GPS coordinates")
                 }
             }
 
-            // Bottom Note
             Text(
                 text = "Ensure GPS is enabled for accurate tracking.",
                 style = MaterialTheme.typography.labelSmall,

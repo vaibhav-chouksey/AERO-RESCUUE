@@ -1,3 +1,4 @@
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -21,8 +22,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // 3. SECURE ACCESS TO MAPBOX KEY
-        // This looks in your local.properties file for MAPBOX_ACCESS_TOKEN
-        val mapboxToken: String = project.findProperty("MAPBOX_ACCESS_TOKEN") as String? ?: ""
+        // This loads the MAPBOX_ACCESS_TOKEN from your local.properties file
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { stream ->
+                localProperties.load(stream)
+            }
+        }
+        val mapboxToken: String = localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: ""
 
         // This makes the key accessible in your code via R.string.mapbox_access_token
         resValue("string", "mapbox_access_token", mapboxToken)
@@ -74,6 +82,9 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
+
+    // OkHttp — explicit for WebSocket drone telemetry support
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))

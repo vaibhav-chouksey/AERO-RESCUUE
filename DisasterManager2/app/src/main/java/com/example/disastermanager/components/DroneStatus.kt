@@ -22,10 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.disastermanager.ui.theme.GlobalNavigation
 
 @Composable
 fun DroneStatusQuickCard(
+    navController: androidx.navigation.NavController,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -34,7 +34,7 @@ fun DroneStatusQuickCard(
             .height(180.dp) // <--- Height increased to match the other card
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable {
-                GlobalNavigation.navController.navigate("drone_status")
+                navController.navigate("drone_status")
             },
         shape = RoundedCornerShape(16.dp), // Matched corner shape (16.dp)
         colors = CardDefaults.cardColors(

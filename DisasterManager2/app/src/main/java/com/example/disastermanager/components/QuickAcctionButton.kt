@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.disastermanager.ui.theme.GlobalNavigation
 
 @Composable
 fun ActionCard(
@@ -76,7 +75,7 @@ fun ActionCard(
 }
 
 @Composable
-fun QuickActionsGrid(modifier: Modifier = Modifier) {
+fun QuickActionsGrid(navController: androidx.navigation.NavController, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -91,7 +90,7 @@ fun QuickActionsGrid(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .height(180.dp)
                 .padding(8.dp),
-            onClick = { GlobalNavigation.navController.navigate("report_disaster")}
+            onClick = { navController.navigate("report_disaster")}
         )
 
         // --- 2. Nearby Alerts (Full Width) ---
@@ -103,7 +102,7 @@ fun QuickActionsGrid(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .height(150.dp) // Height matched to Disaster Reports
                 .padding(8.dp),
-            onClick = { GlobalNavigation.navController.navigate("nearby_alert")}
+            onClick = { navController.navigate("assign_drone")}
         )
 
         // --- 3. Emergency Contacts (Full Width) ---
@@ -116,7 +115,7 @@ fun QuickActionsGrid(modifier: Modifier = Modifier) {
                 .height(140.dp) // Height matched to Disaster Reports
                 .padding(8.dp),
             onClick = {
-                GlobalNavigation.navController.navigate("emergency_contacts")
+                navController.navigate("emergency_contacts")
             }
         )
     }
