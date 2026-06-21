@@ -323,7 +323,7 @@ cd AERO-RESCUUE/DisasterManager2
 - Integrated Firebase, Mapbox, and drone dispatch pipeline
 - Designed MVVM architecture with Hilt DI
 
-📧 vaibhav765@gmail.com
+📧 vaibhavchouksey07@gmail.com
 
 ---
 
